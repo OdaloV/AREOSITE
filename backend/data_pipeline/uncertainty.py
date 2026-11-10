@@ -47,3 +47,12 @@ def compute_uncertainty_layers(layers: Dict[str, np.ndarray]) -> Dict[str, np.nd
     return layers
 
 
+def confidence_label_from_code(code: int) -> str:
+    """Convert numeric confidence code (0, 1, 2) to mission-planner badge string."""
+    if code >= 2:
+        return "HIGH"
+    if code == 1:
+        return "MEDIUM"
+    return "LOW"
+
+
