@@ -130,4 +130,11 @@ def run_preprocessing(
     ice_depth_std_m = (1.0 - arcadia_kernel) * ice_depth_std_m + arcadia_kernel * 1.8
     sharad_passes = np.where(arcadia_dist < 6.0, 3, sharad_passes)
 
+    # 3. Normalized Criterion 2: Landing Safety Score (0..1)
+    # Low slope (< 2 deg) and low elevation (< -2000m for EDL atmospheric density)
+    slope_safety = np.exp(-((slope_deg / 5.5) ** 1.6))
+    elev_safety = 1.0 / (1.0 + np.exp((elevation_m + 1500.0) / 1800.0))
+    safety_score = np.clip(0.65 * slope_safety + 0.35 * elev_safety, 0.02, 0.98)
+    safety_score = (1.0 - arcadia_kernel) * safety_score + arcadia_kernel * 0.88
+
         return {}
