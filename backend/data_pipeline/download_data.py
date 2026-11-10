@@ -22,3 +22,21 @@ from backend.config import (
 logger = logging.getLogger(__name__)
 
 
+def _angular_distance_deg(
+    lat1_deg: np.ndarray,
+    lon1_deg: np.ndarray,
+    lat2_deg: float,
+    lon2_deg: float,
+) -> np.ndarray:
+    """Compute great-circle angular distance in degrees on a sphere."""
+    lat1 = np.radians(lat1_deg)
+    lon1 = np.radians(lon1_deg)
+    lat2 = np.radians(lat2_deg)
+    lon2 = np.radians(lon2_deg)
+
+    dlon = lon1 - lon2
+    cos_c = np.sin(lat1) * np.sin(lat2) + np.cos(lat1) * np.cos(lat2) * np.cos(dlon)
+    cos_c = np.clip(cos_c, -1.0, 1.0)
+    return np.degrees(np.arccos(cos_c))
+
+
