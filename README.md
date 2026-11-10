@@ -1,43 +1,62 @@
 # AREOSITE
-**A Weighted Suitability & Uncertainty Decision Engine for the First Mars Base**
+A Weighted Multi-Criteria Suitability and Uncertainty Decision Engine for Mars Base Siting
 
-> *"Pick your priorities. We'll find your landing site — and tell you how sure we are."*
+AREOSITE combines planetary topography, subsurface water-ice consistency, and orbital radar track coverage into a real-time spatial decision support system for Mars landing site analysis.
 
----
+## Overview
 
-## Architecture & Data Pipeline (`backend/`)
+The engine processes elevation and radar sounder data to evaluate candidate landing zones based on user-defined mission priorities:
+- Water Ice Accessibility (SWIM ice consistency and shallow depth models)
+- Landing Safety (MOLA terrain slope and atmospheric entry elevation)
+- Solar Power Availability (latitude insolation models and slope orientation)
+- Radiation Shielding (atmospheric column density and regolith/ice shielding)
+- Observation Uncertainty (SHARAD orbital pass density, depth estimation confidence, and radar clutter)
 
-AREOSITE combines **USGS MGS MOLA** topography, **PSI SWIM** subsurface water-ice mapping, and **MRO SHARAD** orbital radar pass coverage into a real-time multi-criteria decision engine with explicit uncertainty quantification.
+## Architecture
 
-### Pipeline Modules
-1. **[`backend/data_pipeline/download_data.py`](backend/data_pipeline/download_data.py)** — Downloads official MOLA & SWIM GeoTIFFs (or generates scientifically calibrated 0.5° global Mars GeoTIFFs anchored on 10 real candidate landing sites: Arcadia Planitia, Utopia Planitia, Deuteronilus Mensae, Jezero Crater, Amazonis Planitia, Chryse Planitia, Hellas Planitia, Elysium Planitia, Valles Marineris, and Tharsis).
-2. **[`backend/data_pipeline/preprocess.py`](backend/data_pipeline/preprocess.py)** — Reprojects all rasters to a unified `EPSG:4326` equirectangular Mars grid (`[-180, 180] x [-90, 90]`), computes spherical slope from MOLA DEM, and derives normalized `[0, 1]` criteria layers (`ice_score`, `safety_score`, `power_score`, `radiation_score`), saving a multi-band GeoTIFF (`data/processed/mars_criteria_stack.tif`) for QGIS inspection.
-3. **[`backend/data_pipeline/uncertainty.py`](backend/data_pipeline/uncertainty.py)** — Computes continuous orbital sensor confidence (`confidence_score`, `uncertainty_score`, and `HIGH` / `MEDIUM` / `LOW` badges) from SHARAD radar pass density, ice depth error bars (`± m`), and topographic radar clutter.
-4. **[`backend/data_pipeline/scoring.py`](backend/data_pipeline/scoring.py)** — Real-time weighted suitability engine and Mission Planner Report Card generator.
-5. **[`backend/data_pipeline/generate_tiles.py`](backend/data_pipeline/generate_tiles.py)** — Exports RGBA GeoTIFFs, high-res equirectangular PNG overlays (`data/layers/*.png`), XYZ slippy-map tile pyramids (`data/tiles/{layer}/{z}/{x}/{y}.png`) for CesiumJS, and compact JSON lookup grids (`data/processed/mars_grid.json`, `data/processed/named_sites.json`).
-6. **[`backend/api/app.py`](backend/api/app.py)** — FastAPI service serving report cards, site recommendations, dynamic RGBA overlays, and map tiles.
+The project is structured into modular layers:
 
----
+- `backend/config.py`: Mars physical constants, geographic coordinate bounds, CRS definitions, and candidate landing sites.
+- `backend/data_pipeline/download_data.py`: Data ingestion interface for USGS MOLA DEM and PSI SWIM rasters, including calibrated synthetic generation for offline use.
+- `backend/data_pipeline/preprocess.py`: Reprojection to EPSG:4326, terrain slope derivation, and criteria score normalization.
+- `backend/data_pipeline/uncertainty.py`: Orbital radar coverage quantification, sensor error margins, and categorical confidence classification.
+- `backend/data_pipeline/scoring.py`: Multi-criteria weighted suitability calculations, nearest-site spatial index, and mission report cards.
+- `backend/data_pipeline/generate_tiles.py`: Slippy-map XYZ tile pyramid generation and RGBA raster rendering for CesiumJS globe integration.
+- `backend/data_pipeline/run_pipeline.py`: End-to-end command-line pipeline executor.
+- `backend/api/app.py`: FastAPI service providing REST endpoints for report cards, site rankings, dynamic heatmap generation, and tile hosting.
 
-## Quickstart
+## Installation and Setup
 
-```bash
-# 1. Activate virtual environment
-source .venv/bin/activate
+1. Create and activate a Python virtual environment:
+   ```bash
+   python3 -m venv .venv
+   source .venv/bin/activate
+   ```
 
-# 2. Run the end-to-end data pipeline (generates GeoTIFFs, tiles, and JSON grids)
-python -m backend.data_pipeline.run_pipeline
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-# 3. Start the FastAPI backend server
-uvicorn backend.api.app:app --reload --port 8000
+3. Run the complete data pipeline:
+   ```bash
+   python -m backend.data_pipeline.run_pipeline
+   ```
 
-# 4. Run automated test suite
-pytest -v
-```
+4. Run automated tests:
+   ```bash
+   pytest -v
+   ```
 
-### Key API Endpoints
-- `GET /api/health` — Pipeline & grid status
-- `GET /api/report-card?lat=35.0&lon=210.0&w_ice=1.0&w_safety=0.0&w_power=0.0&w_radiation=0.0` — Mission Planner Report Card with error bars and SHARAD confidence
-- `GET /api/sites/recommend?w_ice=1.0&w_safety=0.5&w_power=0.3&w_radiation=0.4` — Top ranked Mars landing sites for current slider weights
-- `GET /api/dynamic-layer.png?w_ice=1.0&w_safety=0.0&w_power=0.0&w_radiation=0.0&mode=suitability` — Real-time RGBA heatmap overlay for CesiumJS
-- `GET /tiles/{layer}/{z}/{x}/{y}.png` & `GET /layers/{layer}.png` — Pre-baked XYZ tiles and single-tile imagery layers
+5. Launch the backend API server:
+   ```bash
+   uvicorn backend.api.app:app --reload --port 8000
+   ```
+
+## API Reference
+
+- `GET /api/health`: Health status and pipeline metadata.
+- `GET /api/report-card`: Coordinate inspection returning site metrics, confidence level, and ice depth error bars.
+- `GET /api/sites/recommend`: Ranks top candidate landing locations based on active criteria weights.
+- `GET /api/dynamic-layer.png`: Generates dynamic equirectangular RGBA overlay images based on real-time weights.
+- `GET /tiles/{layer}/{z}/{x}/{y}.png`: Static XYZ map tiles for CesiumJS globe layers.

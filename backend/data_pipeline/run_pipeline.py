@@ -65,7 +65,7 @@ def execute_full_pipeline(
         max_zoom=max_zoom,
     )
 
-    # Step 5: Verify the Judges' Wow Moment (Arcadia Planitia with Ice slider maxed)
+    # Step 5: Verify Arcadia Planitia baseline report card (Ice slider prioritized)
     arcadia_card = build_report_card(
         layers,
         lat=35.0,
@@ -89,7 +89,7 @@ def execute_full_pipeline(
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
     parser = argparse.ArgumentParser(
-        description="Run the complete AREOSITE Mars suitability & uncertainty data pipeline."
+        description="Run the complete AREOSITE Mars suitability and uncertainty data pipeline."
     )
     parser.add_argument(
         "--remote",
@@ -109,7 +109,7 @@ def main() -> None:
     )
 
     print("\n" + "=" * 64)
-    print("🏆 JUDGES' WOW MOMENT VERIFICATION (Ice Slider = MAX, Click 35°N 210°E)")
+    print("BASELINE SITE REPORT CARD (Ice Priority, Arcadia Planitia 35°N 210°E)")
     print("=" * 64)
     print(result["verification_card"]["mission_planner_copy"])
     print("=" * 64)

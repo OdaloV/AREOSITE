@@ -9,8 +9,8 @@ from backend.data_pipeline.run_pipeline import execute_full_pipeline
 from backend.data_pipeline.scoring import build_report_card, recommend_top_sites
 
 
-def test_full_data_pipeline_and_judges_wow_moment():
-    """Verify end-to-end execution of MOLA+SWIM preprocessing, uncertainty, and Arcadia Planitia card."""
+def test_full_data_pipeline_and_baseline_verification():
+    """Verify end-to-end execution of MOLA and SWIM preprocessing, uncertainty, and Arcadia Planitia card."""
     res = execute_full_pipeline(attempt_remote=False, width=720, height=360, max_zoom=2)
     layers = res["layers"]
 
@@ -32,7 +32,7 @@ def test_full_data_pipeline_and_judges_wow_moment():
     assert (PROCESSED_DIR / "mars_grid.json").exists()
     assert (PROCESSED_DIR / "named_sites.json").exists()
 
-    # 3. Verify the Judges' Wow Moment at Arcadia Planitia (35°N, 210°E) with Ice Slider = MAX
+    # 3. Verify Arcadia Planitia baseline report card (35°N, 210°E) with Ice Slider prioritized
     card = build_report_card(
         layers,
         lat=35.0,
@@ -53,7 +53,7 @@ def test_full_data_pipeline_and_judges_wow_moment():
     expected_copy = (
         "Recommended site: Arcadia Planitia (35°N, 210°E)\n"
         "Suitability score: 0.87\n"
-        "⚠️ Confidence: MEDIUM\n"
+        "Confidence: MEDIUM\n"
         "Ice depth estimate: 2.1 m ± 1.8 m\n"
         "Based on 3 SHARAD passes. Coverage gap to the south."
     )

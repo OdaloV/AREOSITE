@@ -144,7 +144,7 @@ def build_report_card(
     summary_text = (
         f"{headline}\n"
         f"Suitability score: {suitability_score:.2f}\n"
-        f"⚠️ Confidence: {conf_label}\n"
+        f"Confidence: {conf_label}\n"
         f"Ice depth estimate: {ice_depth_m:.1f} m ± {ice_depth_std_m:.1f} m\n"
         f"Based on {sharad_passes} SHARAD passes. {coverage_note}"
     )

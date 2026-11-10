@@ -8,15 +8,16 @@ env/
 *.egg-info/
 .pytest_cache/
 
-# Raw large datasets (keep processed lightweight outputs or regenerate via pipeline)
-data/raw/*.tif
-data/raw/*.tiff
-data/raw/*.img
-data/raw/*.lbl
+# Geospatial Generated Cache
+data/raw/
 data/tiles/
+data/layers/
+data/processed/*.tif
+data/processed/*.npz
 
 # OS / Editor
 .DS_Store
 .vscode/
 .idea/
 *.swp
+
