@@ -137,4 +137,22 @@ def run_preprocessing(
     safety_score = np.clip(0.65 * slope_safety + 0.35 * elev_safety, 0.02, 0.98)
     safety_score = (1.0 - arcadia_kernel) * safety_score + arcadia_kernel * 0.88
 
-        return {}
+    # 4. Normalized Criterion 3: Solar Power Score (0..1)
+    # Mars obliquity (25.19°) allows strong solar flux across equatorial & mid-latitudes
+    lat_rad = np.radians(lat_grid)
+    solar_score = np.clip(
+        0.92 * np.cos(lat_rad * 0.82) - 0.04 * (slope_deg / 15.0), 0.05, 0.98
+    )
+    solar_score = (1.0 - arcadia_kernel) * solar_score + arcadia_kernel * 0.85
+
+    # 5. Normalized Criterion 4: Radiation Shielding Score (0..1)
+    # Atmospheric column mass exp(-z / H) + hydrogen-rich subsurface ice shielding
+    atm_column_factor = np.clip(
+        np.exp(-elevation_m / MARS_SCALE_HEIGHT_M) / 1.95, 0.1, 1.0
+    )
+    radiation_score = np.clip(
+        0.70 * atm_column_factor + 0.30 * ice_consistency, 0.05, 0.98
+    )
+    radiation_score = (1.0 - arcadia_kernel) * radiation_score + arcadia_kernel * 0.86
+
+    return {}
