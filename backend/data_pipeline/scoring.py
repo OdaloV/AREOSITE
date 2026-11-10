@@ -149,4 +149,36 @@ def build_report_card(
         f"Based on {sharad_passes} SHARAD passes. {coverage_note}"
     )
 
-    return {}
+    return {
+        "site_name": site_name,
+        "coordinates_formatted": display_coords,
+        "lat": round(lat, 2),
+        "lon_180": round(lon_180, 2),
+        "lon_360": round(lon_360, 2),
+        "suitability_score": suitability_score,
+        "confidence_level": conf_label,
+        "confidence_score": conf_score,
+        "ice_depth_m": ice_depth_m,
+        "ice_depth_std_m": ice_depth_std_m,
+        "ice_depth_formatted": f"{ice_depth_m:.1f} m ± {ice_depth_std_m:.1f} m",
+        "sharad_passes": sharad_passes,
+        "coverage_gap_note": coverage_note,
+        "geology_note": geology_note,
+        "metrics": {
+            "ice_score": round(float(layers["ice_score"][row, col]), 2),
+            "safety_score": round(float(layers["safety_score"][row, col]), 2),
+            "power_score": round(float(layers["power_score"][row, col]), 2),
+            "radiation_score": round(float(layers["radiation_score"][row, col]), 2),
+            "elevation_m": elevation_m,
+            "slope_deg": slope_deg,
+        },
+        "weights_applied": {
+            "ice": round(float(w_ice), 2),
+            "safety": round(float(w_safety), 2),
+            "power": round(float(w_power), 2),
+            "radiation": round(float(w_radiation), 2),
+        },
+        "mission_planner_copy": summary_text,
+    }
+
+
