@@ -78,3 +78,49 @@ def format_mars_coords(lat: float, lon: float) -> str:
     return f"{lat_str}, {lon_str}"
 
 
+def build_report_card(
+    layers: Dict[str, np.ndarray],
+    lat: float,
+    lon: float,
+    w_ice: float = 1.0,
+    w_safety: float = 0.0,
+    w_power: float = 0.0,
+    w_radiation: float = 0.0,
+) -> Dict[str, Any]:
+    """Generate the full Mission Planner Report Card for a clicked (lat, lon) coordinate."""
+    lat = float(np.clip(lat, -89.9, 89.9))
+    lon_180 = normalize_lon_180(lon)
+    lon_360 = normalize_lon_360(lon)
+
+    lats = layers["lats"]
+    lons = layers["lons"]
+    row = int(np.argmin(np.abs(lats - lat)))
+    col = int(np.argmin(np.abs(lons - lon_180)))
+
+    suitability_grid = compute_weighted_suitability(
+        layers, w_ice=w_ice, w_safety=w_safety, w_power=w_power, w_radiation=w_radiation
+    )
+    suitability_score = round(float(suitability_grid[row, col]), 2)
+
+    matched_region, dist_deg = match_landmark_region(lat, lon_180)
+    if matched_region and dist_deg <= matched_region["radius_deg"]:
+        site_name = matched_region["name"]
+        # If within the core of a landmark region, snap display coordinates if very close
+        if dist_deg <= 5.0:
+            display_coords = format_mars_coords(
+                matched_region["lat"], matched_region["lon_360"]
+            )
+        else:
+            display_coords = format_mars_coords(lat, lon_360)
+        geology_note = matched_region["geology_note"]
+    else:
+        lat_band = (
+            "Northern Lowlands"
+            if lat > 20
+            else ("Southern Highlands" if lat < -20 else "Equatorial Dichotomy Zone")
+        )
+        site_name = f"Uncharted Sector ({lat_band})"
+        display_coords = format_mars_coords(lat, lon_360)
+        geology_note = "Regional regolith plains surveyed by MGS MOLA and MRO SHARAD."
+
+    return {}
