@@ -32,6 +32,18 @@ def compute_uncertainty_layers(layers: Dict[str, np.ndarray]) -> Dict[str, np.nd
 
     uncertainty_score = (1.0 - confidence_score).astype(np.float32)
 
+    # Categorical level code: 0 = LOW, 1 = MEDIUM, 2 = HIGH
+    confidence_level_code = np.ones_like(sharad_passes, dtype=np.int32)
+    confidence_level_code = np.where(
+        (confidence_score >= 0.70) & (sharad_passes >= 6), 2, confidence_level_code
+    )
+    confidence_level_code = np.where(
+        (confidence_score < 0.42) | (sharad_passes <= 2), 0, confidence_level_code
+    )
+
     layers["confidence_score"] = confidence_score
     layers["uncertainty_score"] = uncertainty_score
+    layers["confidence_level_code"] = confidence_level_code
     return layers
+
+
