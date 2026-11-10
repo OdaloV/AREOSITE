@@ -155,4 +155,48 @@ def run_preprocessing(
     )
     radiation_score = (1.0 - arcadia_kernel) * radiation_score + arcadia_kernel * 0.86
 
-    return {}
+    layers = {
+        "lats": lats.astype(np.float32),
+        "lons": lons.astype(np.float32),
+        "elevation_m": elevation_m.astype(np.float32),
+        "slope_deg": slope_deg.astype(np.float32),
+        "ice_consistency": ice_consistency.astype(np.float32),
+        "ice_depth_m": ice_depth_m.astype(np.float32),
+        "ice_depth_std_m": ice_depth_std_m.astype(np.float32),
+        "sharad_passes": sharad_passes.astype(np.int32),
+        "ice_score": ice_score.astype(np.float32),
+        "safety_score": safety_score.astype(np.float32),
+        "power_score": solar_score.astype(np.float32),
+        "radiation_score": radiation_score.astype(np.float32),
+    }
+
+    # Save multi-band GeoTIFF stack for QGIS inspection & GDAL compatibility
+    stack_path = processed_dir / "mars_criteria_stack.tif"
+    transform = from_bounds(-180.0, -90.0, 180.0, 90.0, width, height)
+    band_names = [
+        "ice_score",
+        "safety_score",
+        "power_score",
+        "radiation_score",
+        "elevation_m",
+        "slope_deg",
+        "ice_depth_m",
+        "ice_depth_std_m",
+    ]
+    with rasterio.open(
+        stack_path,
+        "w",
+        driver="GTiff",
+        height=height,
+        width=width,
+        count=len(band_names),
+        dtype=np.float32,
+        crs=TARGET_CRS,
+        transform=transform,
+    ) as dst:
+        for idx, bname in enumerate(band_names, start=1):
+            dst.write(layers[bname].astype(np.float32), idx)
+            dst.set_band_description(idx, bname)
+
+    logger.info("Saved multi-band criteria GeoTIFF stack: %s", stack_path)
+    return layers
