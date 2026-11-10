@@ -182,3 +182,28 @@ def build_report_card(
     }
 
 
+def recommend_top_sites(
+    layers: Dict[str, np.ndarray],
+    w_ice: float = 0.25,
+    w_safety: float = 0.25,
+    w_power: float = 0.25,
+    w_radiation: float = 0.25,
+    top_k: int = 5,
+) -> List[Dict[str, Any]]:
+    """Rank all curated Mars candidate landing regions under the given priority weights."""
+    cards = [
+        build_report_card(
+            layers,
+            lat=region["lat"],
+            lon=region["lon_360"],
+            w_ice=w_ice,
+            w_safety=w_safety,
+            w_power=w_power,
+            w_radiation=w_radiation,
+        )
+        for region in MARS_REGIONS
+    ]
+    cards.sort(
+        key=lambda c: (c["suitability_score"], c["confidence_score"]), reverse=True
+    )
+    return cards[:top_k]
