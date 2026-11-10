@@ -75,3 +75,21 @@ def describe_coverage_gap(
     return "Dense orbital track crossovers; high radar reflector continuity."
 
 
+def match_landmark_region(
+    lat: float, lon_180: float
+) -> Tuple[Dict[str, Any] | None, float]:
+    """Find the closest curated Mars region and angular distance in degrees."""
+    best_region = None
+    best_dist = 999.0
+    for region in MARS_REGIONS:
+        dist = float(
+            _angular_distance_deg(
+                np.array([lat]), np.array([lon_180]), region["lat"], region["lon_180"]
+            )[0]
+        )
+        if dist < best_dist:
+            best_dist = dist
+            best_region = region
+    if best_region and best_dist <= best_region["radius_deg"]:
+        return best_region, best_dist
+    return best_region, best_dist
