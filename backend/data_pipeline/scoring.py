@@ -123,4 +123,30 @@ def build_report_card(
         display_coords = format_mars_coords(lat, lon_360)
         geology_note = "Regional regolith plains surveyed by MGS MOLA and MRO SHARAD."
 
+    sharad_passes = int(layers["sharad_passes"][row, col])
+    ice_depth_m = round(float(layers["ice_depth_m"][row, col]), 1)
+    ice_depth_std_m = round(float(layers["ice_depth_std_m"][row, col]), 1)
+    elevation_m = round(float(layers["elevation_m"][row, col]), 0)
+    slope_deg = round(float(layers["slope_deg"][row, col]), 1)
+
+    conf_code = int(layers["confidence_level_code"][row, col])
+    conf_label = confidence_label_from_code(conf_code)
+    conf_score = round(float(layers["confidence_score"][row, col]), 2)
+
+    coverage_note = describe_coverage_gap(
+        lat,
+        lon_180,
+        sharad_passes,
+        matched_region if (matched_region and dist_deg <= matched_region["radius_deg"]) else None,
+    )
+
+    headline = f"Recommended site: {site_name} ({display_coords})"
+    summary_text = (
+        f"{headline}\n"
+        f"Suitability score: {suitability_score:.2f}\n"
+        f"⚠️ Confidence: {conf_label}\n"
+        f"Ice depth estimate: {ice_depth_m:.1f} m ± {ice_depth_std_m:.1f} m\n"
+        f"Based on {sharad_passes} SHARAD passes. {coverage_note}"
+    )
+
     return {}
