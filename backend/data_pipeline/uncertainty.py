@@ -56,3 +56,22 @@ def confidence_label_from_code(code: int) -> str:
     return "LOW"
 
 
+def describe_coverage_gap(
+    lat: float,
+    lon_180: float,
+    sharad_passes: int,
+    matched_region: Dict[str, Any] | None = None,
+) -> str:
+    """Generate mission-planner diagnostic note on SHARAD radar coverage gaps."""
+    if matched_region and matched_region.get("coverage_gap"):
+        return str(matched_region["coverage_gap"])
+
+    if sharad_passes <= 2:
+        return "Sparse orbital sub-track spacing. Major coverage gap to the south and west."
+    if sharad_passes <= 4:
+        return "Coverage gap to the south."
+    if abs(lat) < 20.0:
+        return "Equatorial regolith attenuation limits deep SHARAD reflector continuity."
+    return "Dense orbital track crossovers; high radar reflector continuity."
+
+
