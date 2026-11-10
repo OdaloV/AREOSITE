@@ -49,3 +49,32 @@ def compute_weighted_suitability(
     return np.clip(score, 0.0, 1.0).astype(np.float32)
 
 
+def normalize_lon_180(lon: float) -> float:
+    """Convert any longitude (e.g., 0..360E like 210°E) to [-180, 180] (-150°)."""
+    lon_norm = ((float(lon) + 180.0) % 360.0) - 180.0
+    return lon_norm
+
+
+def normalize_lon_360(lon: float) -> float:
+    """Convert any longitude to [0, 360) East."""
+    return float(lon) % 360.0
+
+
+def format_mars_coords(lat: float, lon: float) -> str:
+    """Format Mars coordinates in planetary mission convention, e.g. '35°N, 210°E'."""
+    ns = "N" if lat >= 0 else "S"
+    lon_e = normalize_lon_360(lon)
+    lat_abs = abs(lat)
+    lat_str = (
+        f"{int(round(lat_abs))}°{ns}"
+        if abs(lat_abs - round(lat_abs)) < 0.15
+        else f"{lat_abs:.1f}°{ns}"
+    )
+    lon_str = (
+        f"{int(round(lon_e))}°E"
+        if abs(lon_e - round(lon_e)) < 0.15
+        else f"{lon_e:.1f}°E"
+    )
+    return f"{lat_str}, {lon_str}"
+
+
