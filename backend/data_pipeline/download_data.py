@@ -159,3 +159,61 @@ def generate_calibrated_mars_geotiffs(
     return paths
 
 
+def download_remote_file(url: str, dest: Path, timeout: int = 30) -> bool:
+    """Attempt to download a remote dataset with streaming chunks."""
+    try:
+        logger.info("Downloading %s -> %s ...", url, dest)
+        with requests.get(url, stream=True, timeout=timeout) as resp:
+            resp.raise_for_status()
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            with open(dest, "wb") as f:
+                for chunk in resp.iter_content(chunk_size=1024 * 1024):
+                    if chunk:
+                        f.write(chunk)
+        return True
+    except Exception as exc:
+        logger.warning("Remote download skipped or failed (%s): %s", url, exc)
+        return False
+
+
+def ensure_raw_datasets(
+    output_dir: Path = RAW_DIR,
+    attempt_remote: bool = False,
+    width: int = DEFAULT_GRID_WIDTH,
+    height: int = DEFAULT_GRID_HEIGHT,
+) -> Dict[str, Path]:
+    """Ensure MOLA + SWIM raw GeoTIFFs exist, downloading or generating calibrated rasters."""
+    if attempt_remote:
+        for key, url in OFFICIAL_URLS.items():
+            dest = output_dir / f"{key}.tif"
+            if not dest.exists():
+                download_remote_file(url, dest)
+
+    return generate_calibrated_mars_geotiffs(
+        output_dir=output_dir, width=width, height=height
+    )
+
+
+def main() -> None:
+    logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(message)s")
+    parser = argparse.ArgumentParser(
+        description="Download or generate calibrated MOLA DEM & SWIM Ice GeoTIFFs."
+    )
+    parser.add_argument(
+        "--remote",
+        action="store_true",
+        help="Attempt downloading multi-GB raw rasters from USGS/PSI before fallback.",
+    )
+    parser.add_argument("--width", type=int, default=DEFAULT_GRID_WIDTH)
+    parser.add_argument("--height", type=int, default=DEFAULT_GRID_HEIGHT)
+    args = parser.parse_args()
+
+    paths = ensure_raw_datasets(
+        attempt_remote=args.remote, width=args.width, height=args.height
+    )
+    for name, p in paths.items():
+        print(f"  [OK] {name}: {p}")
+
+
+if __name__ == "__main__":
+    main()
