@@ -47,3 +47,31 @@ def reproject_to_target_grid(
     return dst_array
 
 
+def compute_slope_degrees(elevation_m: np.ndarray) -> np.ndarray:
+    """Compute topographic slope in degrees from MOLA DEM on spherical Mars."""
+    height, width = elevation_m.shape
+    lats = np.linspace(90.0 - 90.0 / height, -90.0 + 90.0 / height, height)
+    dlat_rad = np.radians(180.0 / height)
+    dlon_rad = np.radians(360.0 / width)
+
+    dy_m = MARS_RADIUS_M * dlat_rad
+    cos_lat = np.clip(np.cos(np.radians(lats)), 0.08, 1.0)[:, np.newaxis]
+    dx_m = MARS_RADIUS_M * dlon_rad * cos_lat
+
+    dz_dy, dz_dx = np.gradient(elevation_m)
+    slope_rad = np.arctan(np.sqrt((dz_dx / dx_m) ** 2 + (dz_dy / dy_m) ** 2))
+    slope_deg = np.degrees(slope_rad)
+
+    # Blend with regional sub-grid lander-scale roughness from MARS_REGIONS
+    lons = np.linspace(-180.0 + 180.0 / width, 180.0 - 180.0 / width, width)
+    lon_grid, lat_grid = np.meshgrid(lons, lats)
+    for region in MARS_REGIONS:
+        dist_deg = _angular_distance_deg(
+            lat_grid, lon_grid, region["lat"], region["lon_180"]
+        )
+        weight = np.exp(-0.5 * (dist_deg / (region["radius_deg"] * 0.55)) ** 2)
+        slope_deg = (1.0 - weight) * slope_deg + weight * region["slope_deg"]
+
+    return np.clip(slope_deg, 0.1, 35.0).astype(np.float32)
+
+
