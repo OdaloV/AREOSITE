@@ -1,4 +1,3 @@
-/** Subsurface radar cross-section visualizer and report card */
 import React, { useState } from 'react';
 import { ReportCard as ReportCardType } from '../types';
 import { 
