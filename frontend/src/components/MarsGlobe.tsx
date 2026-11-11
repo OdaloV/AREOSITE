@@ -1,3 +1,4 @@
+/** Cesium 3D Mars Globe with IAU 2000 Ellipsoid and reticle tracking */
 import React, { useEffect, useRef, useState } from 'react';
 import * as Cesium from 'cesium';
 import 'cesium/Build/Cesium/Widgets/widgets.css';
