@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+
+# Geospatial Generated Cache
+data/raw/
+data/tiles/
+data/layers/
+data/processed/*.tif
+data/processed/*.npz
+frontend/public/tiles/
+frontend/public/layers/*.tif
+
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+*.tsbuildinfo
+*.local
+.env
+.env.local
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+
