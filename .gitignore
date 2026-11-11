@@ -14,6 +14,17 @@ data/tiles/
 data/layers/
 data/processed/*.tif
 data/processed/*.npz
+frontend/public/tiles/
+frontend/public/layers/*.tif
+
+# Node / Frontend
+node_modules/
+frontend/node_modules/
+frontend/dist/
+*.tsbuildinfo
+*.local
+.env
+.env.local
 
 # OS / Editor
 .DS_Store
