@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --mars-accent: #E24A2D;
+    --mars-glow: #FF5733;
+    --ice-glow: #00F0FF;
+    --amber-glow: #F59E0B;
+    --green-glow: #00FF9D;
+  }
+
+  body {
+    background-color: #080B11;
+    color: #E2E8F0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Custom tactical scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #0B0E17;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #25334D;
+    border-radius: 2px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #E24A2D;
+  }
+}
+
+/* Glassmorphism Tactical HUD Panels */
+.hud-panel {
+  background: rgba(12, 17, 27, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 74, 45, 0.22);
+  box-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.75), inset 0 0 12px rgba(226, 74, 45, 0.04);
+}
+
+.hud-panel-subtle {
+  background: rgba(15, 22, 36, 0.75);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(56, 189, 248, 0.15);
+}
+
+.hud-panel-glow {
+  box-shadow: 0 0 20px rgba(226, 74, 45, 0.25), inset 0 0 15px rgba(226, 74, 45, 0.08);
+}
+
+/* Tactical Corner Accents */
+.tactical-corners {
+  position: relative;
+}
+.tactical-corners::before,
+.tactical-corners::after {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  pointer-events: none;
+}
+.tactical-corners::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid #E24A2D;
+  border-left: 2px solid #E24A2D;
+}
+.tactical-corners::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid #E24A2D;
+  border-right: 2px solid #E24A2D;
+}
+
+/* Range input tactical styling */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 5px;
+  background: #192439;
+  border-radius: 3px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 2px;
+  background: #FF5733;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(255, 87, 51, 0.8);
+  transition: transform 0.1s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* Cesium Widget Overrides */
+.cesium-widget,
+.cesium-widget canvas {
+  width: 100% !important;
+  height: 100% !important;
+  touch-action: none;
+}
+
+.cesium-viewer-bottom {
+  display: none !important;
+}
